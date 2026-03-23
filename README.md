@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NovaChain — Dynamic Workflow Automation Builder
 
-## Getting Started
+Compliance-first prototype of a visual workflow automation platform inspired by Zapier and n8n.
 
-First, run the development server:
+## What We Are Building
+
+NovaChain lets users create automations on a node canvas:
+
+- Trigger nodes: webhook, schedule, inbound events
+- Action nodes: HTTP calls, messaging, productivity APIs
+- Logic nodes: if/else, delay, branching
+
+Core runtime behavior:
+
+1. User designs workflow graph in the visual editor.
+2. Graph is persisted per user in PostgreSQL via Prisma.
+3. Trigger creates an execution record and queues a job in BullMQ.
+4. Worker consumes queue jobs and executes node-by-node.
+5. Audit logs capture important security/compliance events.
+
+## Stack (Best-Fit for Your Internship Scope)
+
+- Frontend: Next.js App Router + TypeScript + Tailwind + React Flow
+- Backend: Next.js Route Handlers + Zod validation
+- Database: PostgreSQL + Prisma ORM
+- Queue/Async: BullMQ + Redis
+- Security baseline: AES-256-GCM credential encryption, audit logs, basic rate limiting, tenant ownership checks
+
+## Compliance Audit Baseline
+
+Implemented in scaffold:
+
+- Data isolation: user-scoped workflow queries
+- Auditability: centralized audit log writes
+- Credential security: encrypted secret helpers
+- Abuse protection: webhook rate limiting
+- Reliability: durable queue-backed execution
+
+Still required before final internship submission:
+
+- Replace header-based user mock with real authentication and RBAC
+- Move rate limiting to Redis-backed distributed policy
+- Add key rotation strategy and managed secret store
+- Add full execution trace logging and immutable retention policy
+- Add integration-level permission scopes and revocation controls
+
+## Project Structure
+
+- `src/components/workflow`: visual editor components
+- `src/app/api`: API endpoints for workflows/webhooks/health
+- `src/lib/security`: encryption, audit, rate-limit, tenant helpers
+- `src/lib/execution`: queue job runner logic
+- `prisma/schema.prisma`: data model for users/workflows/executions/credentials/audit logs
+
+## Setup
+
+1. Copy environment values:
+
+```bash
+cp .env.example .env
+```
+
+2. Set `DATABASE_URL`, `REDIS_URL`, and a 32-byte base64 `ENCRYPTION_KEY`.
+
+3. Generate Prisma client and run migrations:
+
+```bash
+npm run prisma:generate
+npm run prisma:migrate -- --name init
+```
+
+4. Start app and worker in separate terminals:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run worker
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Available Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev`: start Next.js dev server
+- `npm run worker`: start BullMQ worker
+- `npm run lint`: run ESLint
+- `npm run prisma:generate`: generate Prisma client
+- `npm run prisma:migrate`: run local Prisma migration
+- `npm run prisma:deploy`: run production migrations
+- `npm run prisma:studio`: open Prisma Studio
